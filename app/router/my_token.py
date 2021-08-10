@@ -25,12 +25,17 @@ def verify_token(security_scopes: SecurityScopes,token: str,credentials_exceptio
         token_scopes = payload.get("scopes", [])
         token_data = schemas.TokenData(username=username,scopes=list(token_scopes))
 
+        if security_scopes.scopes:
+            authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
+        else: 
+            authenticate_value = f"Bearer"
+
         for scope in security_scopes.scopes:
             if scope not in token_data.scopes:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Not enough permissions",
-                    # headers={"WWW-Authenticate": authenticate_value},
+                    headers={"WWW-Authenticate": authenticate_value},
                 )
         return token_data
 
