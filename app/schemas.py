@@ -62,18 +62,21 @@ class Resume(Resume_Base):
 
 
 class Account_Base(BaseModel):
-    username: str
-    role: int
+    username: str = "@gmail.com"
+    role: int = 0
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     birthday: Optional[date] = None
     sex: Optional[bool] = None
     address: Optional[str] = None
     phone: Optional[str] = None
-    status: int
+    status: int = 0
 
 class Account_create(Account_Base):
-    password: str
+    password: str = 123
+
+class Account_password(BaseModel):
+    password: str = 123
 
 class Account(Account_Base):
     resumes: List[Resume] = []

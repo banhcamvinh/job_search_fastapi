@@ -1,3 +1,4 @@
+from typing import List
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import mode
 import models, schemas
@@ -11,3 +12,11 @@ def create_job_post(db: Session, job_post: schemas.Job_post_Create, username: st
     db.commit()
     db.refresh(db_job_post)
     return db_job_post
+
+def get_job_posts_filter(filters:dict,db: Session, skip: int = 0, limit: int = 100):
+    job_posts = db.query(models.Job_post)
+    for attr,val in filters.items():
+        print(val)
+        job_posts= job_posts.filter(getattr(models.Job_post,attr).ilike('%{}%'.format(val)))
+    return job_posts.all()
+        

@@ -16,7 +16,4 @@ def get_current_user(security_scopes: SecurityScopes,token: str = Depends(oauth2
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
-
-
     return my_token.verify_token(security_scopes,token,credentials_exception)
