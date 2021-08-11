@@ -91,3 +91,52 @@ def forgot_password(username:str,db: database.Session= Depends(database.get_db))
     """.format(new_password)
     my_email.send_email(username,"Re-send password",content)
     return db_account
+
+@router.put("/me/update",response_model= schemas.Account)
+def update_user_account(accounts: schemas.Account_Info_user,db: database.Session= Depends(database.get_db),current_user: schemas.Account = Depends(oauth2.get_current_user)):
+    db_account = account.get_account(db, username= current_user.username)
+    if not db_account:
+        raise HTTPException(status_code=400, detail="Account not exist")
+    return account.update_user_account_info(db=db,account=accounts,username=current_user.username)
+
+@router.put("/role/{username}/{role}",response_model= schemas.Account)
+def update_account_role_for_admin(username:str,role:int,db: database.Session= Depends(database.get_db),current_user: schemas.Account = Security(oauth2.get_current_user, scopes=["1"])):
+    db_account = account.get_account(db, username= username)
+    if not db_account:
+        raise HTTPException(status_code=400, detail="Account not exist")
+
+    content="""\
+    <html>
+    <body>
+        <p>Hi,<br>
+        Your account has been granted new permission <span style="color:red; font-size:30px;">{}</span><br>
+        Best regards
+        </p>
+    </body>
+    </html>
+    """.format(role)
+    my_email.send_email(username,"Verification Email for register our platform",content)
+
+    return account.update_account_role(db=db,username=username,role=role)
+
+@router.put("/disable/{username}")
+def disable_account_for_admin(username:str, db: database.Session=Depends(database.get_db),current_user: schemas.Account = Security(oauth2.get_current_user, scopes=["1"])):
+    db_account = account.get_account(db, username= username)
+    if not db_account:
+        raise HTTPException(status_code=400, detail="Account not exist")
+
+    account.disable_account(db=db,username=username)
+
+    content="""\
+    <html>
+    <body>
+        <p>Hi,<br>
+        Your account was deleted by admin on our platform<br>
+        Best regards
+        </p>
+    </body>
+    </html>
+    """
+    my_email.send_email(username,"Your account has been delete",content)
+
+    return "success"

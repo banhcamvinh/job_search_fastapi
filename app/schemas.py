@@ -60,6 +60,13 @@ class Resume(Resume_Base):
     class Config:
         orm_mode = True
 
+class Account_Info_user(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    birthday: Optional[date] = None
+    sex: Optional[bool] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
 
 class Account_Base(BaseModel):
     username: str = "@gmail.com"

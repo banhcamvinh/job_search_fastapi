@@ -36,3 +36,26 @@ def create_account(db: Session, account: schemas.Account_create):
     db.commit()
     db.refresh(db_account)
     return db_account
+
+def update_user_account_info(db:Session,account: schemas.Account_Info_user,username:str):
+    db_account = db.query(models.Account).filter(models.Account.username == username).first()
+    if db_account != None:
+        account_dic = dict(account)
+        db.query(models.Account).update(account_dic)
+        db.commit()
+        db.refresh(db_account)
+    return db_account
+
+def update_account_role(db:Session,username:str,role:int):
+    db_account = db.query(models.Account).filter(models.Account.username == username).first()
+    if db_account != None:
+        db_account.role=role
+        db.commit()
+        db.refresh(db_account)
+    return db_account
+
+def disable_account(db:Session,username:str):
+    db_account = db.query(models.Account).filter(models.Account.username == username).first()
+    if db_account != None:
+        db_account.status=0
+        db.commit()
