@@ -8,6 +8,9 @@ from hasing import Hash
 def get_account(db: Session, username: str):
     return db.query(models.Account).filter(models.Account.username == username).first()
 
+def get_active_account(db:Session, username: str):
+    return db.query(models.Account).filter(models.Account.username == username,models.Account.status != 0).first()
+
 def accept_account(db: Session, username:str):
     account = db.query(models.Account).filter(models.Account.username == username).first()
     if account != None:

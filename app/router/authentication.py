@@ -14,7 +14,7 @@ router= APIRouter(
 @router.post('/login')
 def login(request: OAuth2PasswordRequestForm= Depends(), db: database.Session = Depends(database.get_db)):
     # check exist account and password
-    accounts = account.get_account(db=db,username=request.username)
+    accounts = account.get_active_account(db=db,username=request.username)
     if not accounts:
         raise HTTPException(status_code=404,detail=f"Account with {request.username} not found!")
     if not Hash.verify(accounts.password,request.password):

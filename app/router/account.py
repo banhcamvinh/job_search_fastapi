@@ -7,7 +7,6 @@ import my_email
 import string
 import random
 
-
 router =  APIRouter(
     tags = ["Account"],
     prefix = "/accounts"
