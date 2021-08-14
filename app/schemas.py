@@ -1,8 +1,9 @@
+import datetime
 from sqlalchemy import orm
 from sqlalchemy.sql.expression import update
 from pydantic import BaseModel
 from typing import List, Optional
-from datetime import date, time
+from datetime import date, time,datetime
 
 
 class Job_post_Base(BaseModel):
@@ -23,7 +24,6 @@ class Job_post_Base(BaseModel):
     submit_expired_time: Optional[date] = None
 
 class Job_post_db(Job_post_Base):
-    view: Optional[int] = None
     status: Optional[int] = None
     mode: Optional[int] = None
     create_time: Optional[date] = None
@@ -36,8 +36,10 @@ class Job_post(Job_post_Base):
     id: int
     posted_by: str
     about_company: int
+    view: int
     class Config:
         orm_mode = True
+
 
 
 class Resume_Base(BaseModel):
@@ -62,6 +64,7 @@ class Resume(Resume_Base):
     class Config:
         orm_mode = True
 
+
 class Account_Info_user(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -72,14 +75,16 @@ class Account_Info_user(BaseModel):
 
 class Account_Base(BaseModel):
     username: str = "@gmail.com"
-    role: int = 0
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     birthday: Optional[date] = None
     sex: Optional[bool] = None
     address: Optional[str] = None
     phone: Optional[str] = None
+
+class Account_db(Account_Base):
     status: int = 0
+    role: int = 0
 
 class Account_create(Account_Base):
     password: str = 123
@@ -87,9 +92,17 @@ class Account_create(Account_Base):
 class Account_password(BaseModel):
     password: str = 123
 
-class Account(Account_Base):
+class Account_Relationship(Account_Base):
     resumes: List[Resume] = []
     job_posts: List[Job_post] = []
+    class Config():
+        orm_mode = True
+
+class Account_Info(Account_Base):
+    class Config():
+        orm_mode = True
+
+class Account_db_orm(Account_db):
     class Config():
         orm_mode = True
 
@@ -104,6 +117,8 @@ class Company_Base(BaseModel):
     industry: Optional[str] = None
     founded: Optional[int] = None
     size: Optional[int] = None
+
+class Company_db(Company_Base):
     status: Optional[int] = None
 
 class Company_Create(Company_Base):
@@ -111,23 +126,23 @@ class Company_Create(Company_Base):
 
 class Company(Company_Base):
     id: int
-    Job_posts: List[Job_post] = []
+    job_posts: List[Job_post] = []
     class Config():
         orm_mode = True
 
 
-class Job_mark_apply_Base(BaseModel):
+class Job_mark_Base(BaseModel):
     id_job: Optional[int] = None
     by_account: Optional[str] = None
-    type: Optional[str] = None
-    refer_code: Optional[str] = None
-    time: Optional[date] = None
-    status: Optional[int] = None
 
-class Job_mark_apply_Create(Job_mark_apply_Base):
+class Job_mark_Create(Job_mark_Base):
     pass
 
-class Job_mark_apply(Job_mark_apply_Base):
+class Job_mark_db(Job_mark_Base):
+    time: Optional[datetime] = None
+    status: Optional[int] = None
+
+class Job_mark(Job_mark_Base):
     class Config():
         orm_mode = True
 

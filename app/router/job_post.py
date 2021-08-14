@@ -25,6 +25,7 @@ def read_job_post_by_filter(title: Optional[str]=None, position: Optional[str]=N
 
 @router.get("/{job_post_id}", response_model = schemas.Job_post)
 def read_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db)):
+    job_post.increase_job_post_view(db=db, job_post_id= job_post_id)
     return job_post.get_job_posts_by_id(job_post_id= job_post_id,db=db)
 
 @router.post("/{username}/{id_company}", response_model=schemas.Job_post)
@@ -38,3 +39,11 @@ def update_job_post_by_id(job_post_id:int,Job_post: schemas.Job_post_Create, db:
 @router.put("/disable/{job_post_id}",response_model = schemas.Job_post)
 def disable_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db)):
     return job_post.disable_job_post_by_id(db=db,job_post_id=job_post_id)
+
+@router.put("/accept/{job_post_id}",response_model = schemas.Job_post)
+def accept_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db)):
+    return job_post.accept_job_post_by_id(db=db,job_post_id=job_post_id)
+    
+@router.put("/mode/{job_post_id}/{mode}",response_model = schemas.Job_post)
+def change_job_post_mode_by_id(job_post_id:int,mode: int, db: database.Session = Depends(database.get_db)):
+    return job_post.change_job_post__mode_by_id(db=db,job_post_id=job_post_id,mode=mode)

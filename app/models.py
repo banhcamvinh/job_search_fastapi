@@ -3,7 +3,7 @@ from typing import Counter
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
-from sqlalchemy.sql.sqltypes import DATE
+from sqlalchemy.sql.sqltypes import DATE, DateTime
 from sqlalchemy.sql.visitors import traverse_using
 from database import Base
 
@@ -11,7 +11,7 @@ from database import Base
 class Account(Base):
     __tablename__ = "account"
     username = Column(String, primary_key=True)
-    role = Column(Integer, default=0,nullable= False)
+    role = Column(Integer, default= 0,nullable= False)
     password = Column(String,nullable=False)
     first_name = Column(String)
     last_name = Column(String)
@@ -24,10 +24,8 @@ class Account(Base):
     resumes = relationship('Resume',back_populates="account_create")
     job_posts = relationship('Job_post',back_populates="account_post")
 
-    account_job_mark_apply = relationship("Job_mark_apply",back_populates="account")
+    account_job_mark = relationship("Job_mark",back_populates="account")
     account_company_rating = relationship("Company_rating",back_populates="nguoidanhgia_account")
-
-
 
 
 class Resume(Base):
@@ -61,7 +59,7 @@ class Company(Base):
     industry = Column(String)
     founded = Column(Integer)
     size = Column(Integer)
-    status = Column(Integer, nullable=False)
+    status = Column(Integer, nullable=False,default= 0)
 
     job_posts = relationship('Job_post',back_populates="company_post")
     company_company_rating = relationship('Company_rating',back_populates="company_id_company")
@@ -86,9 +84,9 @@ class Job_post(Base):
     update_time = Column(Date)
     expired_time = Column(Date)
     submit_expired_time =Column(Date)
-    view = Column(Integer)
-    status = Column(Integer)
-    mode = Column(Integer)
+    view = Column(Integer,default=0)
+    status = Column(Integer,default=0)
+    mode = Column(Integer,default=0)
     # FK
     posted_by = Column(String, ForeignKey('account.username'))
     about_company = Column(Integer, ForeignKey('company.id'))
@@ -96,21 +94,18 @@ class Job_post(Base):
     account_post = relationship("Account",back_populates="job_posts")
     company_post = relationship("Company",back_populates="job_posts")
 
-    job_post_job_mark_apply = relationship("Job_mark_apply",back_populates="job_post")
+    job_post_job_mark = relationship("Job_mark",back_populates="job_post")
 
-class Job_mark_apply(Base):
-    __tablename__ = "job_mark_apply"
+class Job_mark(Base):
+    __tablename__ = "job_mark"
 
     id_job = Column(ForeignKey('job_post.id'),primary_key=True)
     by_account = Column(ForeignKey('account.username'),primary_key=True)
-
-    type = Column(String)
-    refer_code = Column(String) 
-    time = Column(Date)
+    time = Column(DateTime)
     status = Column(Integer)
 
-    account = relationship("Account", back_populates="account_job_mark_apply")
-    job_post = relationship("Job_post", back_populates="job_post_job_mark_apply")
+    account = relationship("Account", back_populates="account_job_mark")
+    job_post = relationship("Job_post", back_populates="job_post_job_mark")
 
 class Account_rating(Base):
     __tablename__ = "account_rating"

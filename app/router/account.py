@@ -1,3 +1,4 @@
+from sqlalchemy.sql import expression
 from router import oauth2
 from crud import account
 from fastapi import APIRouter,Depends,status,Response,HTTPException,Security
@@ -12,45 +13,49 @@ router =  APIRouter(
     prefix = "/accounts"
 )
 
-@router.get("/me", response_model=schemas.Account)
-def read_account_for_user( db: database.Session = Depends(database.get_db), current_user: schemas.Account = Depends(oauth2.get_current_user)):
+@router.get("/me", response_model=schemas.Account_Info)
+def read_account_for_user( db: database.Session = Depends(database.get_db), current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     db_account = account.get_account(db, username= current_user.username)
     if db_account is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_account
 
-@router.post("/me/change_password",response_model=schemas.Account)
-def change_account_password_for_user(accounts:schemas.Account_password, db: database.Session = Depends(database.get_db), current_user: schemas.Account = Depends(oauth2.get_current_user)):
-    print("Test")
+@router.post("/me/change_password",response_model=schemas.Account_Info)
+def change_account_password_for_user(accounts:schemas.Account_password, db: database.Session = Depends(database.get_db), current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     db_account =  account.change_account_password(db, username= current_user.username,password= accounts.password)
     if db_account is None:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="User not found or disabled")
     return db_account
 
-@router.get("/{username}", response_model=schemas.Account)
-def read_account_for_admin(username: str, db: database.Session = Depends(database.get_db), current_user: schemas.Account = Security(oauth2.get_current_user, scopes=["1"])):
+@router.get("/{username}", response_model=schemas.Account_db_orm)
+def read_account_for_admin(username: str, db: database.Session = Depends(database.get_db), current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
     db_account = account.get_account(db, username= username)
     if db_account is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_account
 
-@router.get( "",response_model=List[schemas.Account])
-def read_accounts_list_for_admin(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account = Security(oauth2.get_current_user, scopes=["1"])):
+@router.get( "",response_model=List[schemas.Account_Info])
+def read_accounts_list_for_admin(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
     accounts = account.get_accounts(db, skip=skip, limit=limit)
     return accounts
 
-@router.get("/verify/{username}",response_model= schemas.Account)
+@router.get("/verify/{username}",response_model= schemas.Account_Info)
 def verify_account(username: str, db: database.Session = Depends(database.get_db)):
-    db_account= account.accept_account(db,username=username)
+    db_account= account.verify_account(db,username=username)
     if db_account is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db_account
 
-@router.post( "",response_model=schemas.Account)
+@router.post( "",response_model=schemas.Account_Info)
 def create_account(accounts: schemas.Account_create, db: database.Session = Depends(database.get_db)):
     db_account = account.get_account(db, username= accounts.username)
     if db_account:
         raise HTTPException(status_code=400, detail="Email already registered")
+
+    try:
+        accounts = account.create_account(db,accounts)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Something went wrong, please try again")
 
     content="""\
     <html>
@@ -65,11 +70,11 @@ def create_account(accounts: schemas.Account_create, db: database.Session = Depe
     """.format(accounts.username)
     my_email.send_email(accounts.username,"Verification Email for register our platform",content)
 
-    return account.create_account(db,accounts)
+    return accounts
 
-@router.post("/forgot_password/{username}",response_model= schemas.Account)
+@router.post("/forgot_password/{username}",response_model= schemas.Account_Info)
 def forgot_password(username:str,db: database.Session= Depends(database.get_db)):
-    db_account = account.get_account(db, username= username)
+    db_account = account.get_active_account(db, username= username)
     if not db_account:
         raise HTTPException(status_code=400, detail="This account does not exist")
     
@@ -91,16 +96,16 @@ def forgot_password(username:str,db: database.Session= Depends(database.get_db))
     my_email.send_email(username,"Re-send password",content)
     return db_account
 
-@router.put("/me/update",response_model= schemas.Account)
-def update_user_account(accounts: schemas.Account_Info_user,db: database.Session= Depends(database.get_db),current_user: schemas.Account = Depends(oauth2.get_current_user)):
-    db_account = account.get_account(db, username= current_user.username)
+@router.put("/me/update",response_model= schemas.Account_Info)
+def update_user_account(accounts: schemas.Account_Info_user,db: database.Session= Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+    db_account = account.get_active_account(db, username= current_user.username)
     if not db_account:
-        raise HTTPException(status_code=400, detail="Account not exist")
+        raise HTTPException(status_code=400, detail="Account not exist or disabled")
     return account.update_user_account_info(db=db,account=accounts,username=current_user.username)
 
-@router.put("/role/{username}/{role}",response_model= schemas.Account)
-def update_account_role_for_admin(username:str,role:int,db: database.Session= Depends(database.get_db),current_user: schemas.Account = Security(oauth2.get_current_user, scopes=["1"])):
-    db_account = account.get_account(db, username= username)
+@router.put("/role/{username}/{role}",response_model= schemas.Account_db_orm)
+def update_account_role_for_admin(username:str,role:int,db: database.Session= Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+    db_account = account.get_active_account(db, username= username)
     if not db_account:
         raise HTTPException(status_code=400, detail="Account not exist")
 
@@ -114,13 +119,13 @@ def update_account_role_for_admin(username:str,role:int,db: database.Session= De
     </body>
     </html>
     """.format(role)
-    my_email.send_email(username,"Verification Email for register our platform",content)
+    my_email.send_email(username,"Your account has new permission",content)
 
     return account.update_account_role(db=db,username=username,role=role)
 
 @router.put("/disable/{username}")
-def disable_account_for_admin(username:str, db: database.Session=Depends(database.get_db),current_user: schemas.Account = Security(oauth2.get_current_user, scopes=["1"])):
-    db_account = account.get_account(db, username= username)
+def disable_account_for_admin(username:str, db: database.Session=Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+    db_account = account.get_active_account(db, username= username)
     if not db_account:
         raise HTTPException(status_code=400, detail="Account not exist")
 

@@ -11,7 +11,7 @@ def get_account(db: Session, username: str):
 def get_active_account(db:Session, username: str):
     return db.query(models.Account).filter(models.Account.username == username,models.Account.status != 0).first()
 
-def accept_account(db: Session, username:str):
+def verify_account(db: Session, username:str):
     account = db.query(models.Account).filter(models.Account.username == username).first()
     if account != None:
         account.status=1
@@ -20,7 +20,7 @@ def accept_account(db: Session, username:str):
     return account
 
 def change_account_password(db: Session, username:str, password:str):
-    account = db.query(models.Account).filter(models.Account.username == username).first()
+    account = db.query(models.Account).filter(models.Account.username == username).filter(models.Account.status != 0).first()
     if account != None:
         hashed_password = Hash.get_password_hash(password)
         account.password= hashed_password
@@ -44,7 +44,7 @@ def update_user_account_info(db:Session,account: schemas.Account_Info_user,usern
     db_account = db.query(models.Account).filter(models.Account.username == username).first()
     if db_account != None:
         account_dic = dict(account)
-        db.query(models.Account).update(account_dic)
+        db.query(models.Account).filter(models.Account.username == username).update(account_dic)
         db.commit()
         db.refresh(db_account)
     return db_account
