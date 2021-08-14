@@ -147,6 +147,26 @@ class Job_mark(Job_mark_Base):
         orm_mode = True
 
 
+class Job_apply_Base(BaseModel):
+    id_job: Optional[int] = None
+    id_resume: Optional[int] = None
+    refer_code: Optional[str] = None
+
+class Job_apply_Create(Job_apply_Base):
+    pass
+
+class Job_apply_db(Job_apply_Base):
+    time: Optional[datetime] = None
+    status: Optional[int] = None
+
+class Job_apply(Job_apply_Base):
+    job_post: Job_post = None
+    resume: Resume = None
+    class Config():
+        orm_mode = True
+
+
+
 class Account_rating_Base(BaseModel):
     nguoidanhgia: Optional[str] = None
     nguoibidanhgia: Optional[str] = None

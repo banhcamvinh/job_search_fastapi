@@ -46,6 +46,7 @@ class Resume(Base):
     create_by = Column(String, ForeignKey('account.username'))
 
     account_create = relationship("Account",back_populates="resumes")
+    resume_job_apply = relationship("Job_apply",back_populates="resume")
 
 class Company(Base):
     __tablename__="company"
@@ -95,6 +96,8 @@ class Job_post(Base):
     company_post = relationship("Company",back_populates="job_posts")
 
     job_post_job_mark = relationship("Job_mark",back_populates="job_post")
+    job_post_job_apply = relationship("Job_apply",back_populates="job_post")
+    
 
 class Job_mark(Base):
     __tablename__ = "job_mark"
@@ -106,6 +109,18 @@ class Job_mark(Base):
 
     account = relationship("Account", back_populates="account_job_mark")
     job_post = relationship("Job_post", back_populates="job_post_job_mark")
+
+class Job_apply(Base):
+    __tablename__= "job_apply"
+
+    id_job = Column(ForeignKey('job_post.id'),primary_key=True)
+    id_resume = Column(ForeignKey('resume.id'),primary_key=True)
+    time = Column(DateTime)
+    refer_code = Column(String)
+    status = Column(Integer,nullable=False,default=1)
+
+    resume = relationship("Resume", back_populates="resume_job_apply")
+    job_post = relationship("Job_post", back_populates="job_post_job_apply")
 
 class Account_rating(Base):
     __tablename__ = "account_rating"
