@@ -1,6 +1,6 @@
 from datetime import date
 from typing import Counter
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Date,DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import expression
 from sqlalchemy.sql.sqltypes import DATE, DateTime
@@ -127,11 +127,11 @@ class Account_rating(Base):
 
     nguoidanhgia= Column(ForeignKey('account.username'),primary_key=True)
     nguoibidanhgia= Column(ForeignKey('account.username'),primary_key=True)
-    time = Column(Date,primary_key=True)
+    time = Column(DateTime,primary_key=True)
 
     content = Column(String)
     point = Column(Integer)
-    status= Column(Integer)
+    status= Column(Integer,nullable=False,default=1)
 
     nguoidanhgia_account=relationship("Account",foreign_keys=[nguoidanhgia])
     nguoibidanhgia_account=relationship("Account",foreign_keys=[nguoibidanhgia])
@@ -141,7 +141,7 @@ class Company_rating(Base):
 
     nguoidanhgia= Column(ForeignKey('account.username'),primary_key=True)
     company_id = Column(ForeignKey('company.id'),primary_key=True)
-    time = Column(Date,primary_key=True)
+    time = Column(DateTime,primary_key=True)
 
     content= Column(String)
     point = Column(Integer)

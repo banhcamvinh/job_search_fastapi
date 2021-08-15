@@ -53,10 +53,12 @@ class Resume_Base(BaseModel):
     academic_level: Optional[str] = None
     tags: Optional[str] = None
     file: Optional[str] = None
-    status: int
 
 class Resume_Create(Resume_Base):
     pass
+
+class Resume_db(Resume_Base):
+    status: int
 
 class Resume(Resume_Base):
     id: int
@@ -170,13 +172,18 @@ class Job_apply(Job_apply_Base):
 class Account_rating_Base(BaseModel):
     nguoidanhgia: Optional[str] = None
     nguoibidanhgia: Optional[str] = None
-    time: Optional[date] = None
     content: Optional[str]= None
     point: Optional[int]= None
-    status: Optional[int] = None
 
 class Account_rating_Create(Account_rating_Base):
     pass
+
+class Account_rating_time(Account_rating_Base):
+    time: Optional[datetime] = None
+
+class Account_rating_db(Account_rating_Base):
+    time: Optional[datetime] = None
+    status: Optional[int] = None
 
 class Account_rating(Account_rating_Base):
     class Config():
@@ -186,13 +193,19 @@ class Account_rating(Account_rating_Base):
 class Company_rating_Base(BaseModel):
     nguoidanhgia: Optional[str] = None
     company_id: Optional[int] = None
-    time: Optional[date] = None
     content: Optional[str]= None
     point: Optional[int]= None
-    status: Optional[int] = None
 
 class Company_rating_Create(Company_rating_Base):
     pass
+
+class Company_rating_time(Company_rating_Base):
+    time: Optional[datetime] = None
+
+class Company_rating_db(Company_rating_Base):
+    time: Optional[datetime] = None
+    status: Optional[int] = None
+
 
 class Company_rating(Company_rating_Base):
     class Config():
