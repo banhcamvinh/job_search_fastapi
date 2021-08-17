@@ -66,6 +66,9 @@ class Resume(Resume_Base):
     class Config:
         orm_mode = True
 
+class Resume_Admin(Resume):
+    status:int
+
 
 class Account_Info_user(BaseModel):
     first_name: Optional[str] = None
@@ -90,6 +93,13 @@ class Account_db(Account_Base):
 
 class Account_create(Account_Base):
     password: str = 123
+
+class Account_Admin(Account_Info_user):
+    status: int = 0
+    role: int = 0
+    password: str
+    class Config():
+        orm_mode = True
 
 class Account_password(BaseModel):
     password: str = 123

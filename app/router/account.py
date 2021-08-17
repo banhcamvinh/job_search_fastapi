@@ -39,7 +39,7 @@ def read_accounts_list_for_admin(skip: int = 0, limit: int = 100, db: database.S
     accounts = account.get_accounts(db, skip=skip, limit=limit)
     return accounts
 
-@router.get("/verify/{username}",response_model= schemas.Account_Info)
+@router.post("/verify/{username}",response_model= schemas.Account_Info)
 def verify_account(username: str, db: database.Session = Depends(database.get_db)):
     db_account= account.verify_account(db,username=username)
     if db_account is None:
@@ -51,7 +51,6 @@ def create_account(accounts: schemas.Account_create, db: database.Session = Depe
     db_account = account.get_account(db, username= accounts.username)
     if db_account:
         raise HTTPException(status_code=400, detail="Email already registered")
-
     try:
         accounts = account.create_account(db,accounts)
     except Exception as e:
@@ -69,7 +68,6 @@ def create_account(accounts: schemas.Account_create, db: database.Session = Depe
     </html>
     """.format(accounts.username)
     my_email.send_email(accounts.username,"Verification Email for register our platform",content)
-
     return accounts
 
 @router.post("/forgot_password/{username}",response_model= schemas.Account_Info)
@@ -103,6 +101,13 @@ def update_user_account(accounts: schemas.Account_Info_user,db: database.Session
         raise HTTPException(status_code=400, detail="Account not exist or disabled")
     return account.update_user_account_info(db=db,account=accounts,username=current_user.username)
 
+@router.put("/update/{username}",response_model= schemas.Account_Admin)
+def update_user_account_for_admin(username:str, accounts: schemas.Account_Admin,db: database.Session= Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+    db_account = account.get_active_account(db, username= username)
+    if not db_account:
+        raise HTTPException(status_code=400, detail="Account not exist or disabled")
+    return account.update_user_account_info_by_admin(db=db,account=accounts,username= username)
+
 @router.put("/role/{username}/{role}",response_model= schemas.Account_db_orm)
 def update_account_role_for_admin(username:str,role:int,db: database.Session= Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
     db_account = account.get_active_account(db, username= username)
@@ -123,7 +128,7 @@ def update_account_role_for_admin(username:str,role:int,db: database.Session= De
 
     return account.update_account_role(db=db,username=username,role=role)
 
-@router.put("/disable/{username}")
+@router.put("/disable/{username}",status_code =200)
 def disable_account_for_admin(username:str, db: database.Session=Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
     db_account = account.get_active_account(db, username= username)
     if not db_account:
@@ -143,4 +148,4 @@ def disable_account_for_admin(username:str, db: database.Session=Depends(databas
     """
     my_email.send_email(username,"Your account has been delete",content)
 
-    return "success"
+    return {"message":"success"}

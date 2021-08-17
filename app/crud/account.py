@@ -49,6 +49,16 @@ def update_user_account_info(db:Session,account: schemas.Account_Info_user,usern
         db.refresh(db_account)
     return db_account
 
+def update_user_account_info_by_admin(db:Session,account: schemas.Account_Admin,username:str):
+    db_account = db.query(models.Account).filter(models.Account.username == username).first()
+    if db_account != None:
+        account_dic = dict(account)
+        account_dic['password'] = Hash.get_password_hash(account_dic['password'])
+        db.query(models.Account).filter(models.Account.username == username).update(account_dic)
+        db.commit()
+        db.refresh(db_account)
+    return db_account
+
 def update_account_role(db:Session,username:str,role:int):
     db_account = db.query(models.Account).filter(models.Account.username == username).first()
     if db_account != None:
