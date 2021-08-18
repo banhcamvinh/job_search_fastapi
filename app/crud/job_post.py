@@ -18,6 +18,9 @@ def create_job_post(db: Session, job_post: schemas.Job_post_Create, username: st
     user = db.query(models.Account).filter(models.Account.username == username).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
+    company = db.query(models.Company).filter(models.Company.id == id_company).first()
+    if company is None:
+        raise HTTPException(status_code=404, detail="Company not found")
     db_job_post = models.Job_post(**job_post.dict(), posted_by=username,about_company= id_company)
     now = datetime.now()
     expired_time = now + timedelta(weeks=4)

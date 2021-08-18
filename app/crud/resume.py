@@ -17,6 +17,9 @@ def get_resume_by_id(db:Session, resume_id: int):
     return resume
 
 def get_resume_by_username(db:Session, username: str):
+    acc = db.query(models.Account).filter(models.Account.username == username).first()
+    if acc is None:
+        raise HTTPException(status_code=404, detail="Username not found")
     resume = db.query(models.Resume).filter(models.Resume.create_by == username).all()
     return resume
 

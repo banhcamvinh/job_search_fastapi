@@ -50,6 +50,9 @@ def create_job_apply(db:Session, apply_job: schemas.Job_apply_Create):
     resume = db.query(models.Resume).filter(models.Resume.id == apply_job_dic["id_resume"]).first()
     if resume is None:
         raise HTTPException(status_code=404, detail="Resume not found")
+    job_apply = db.query(models.Job_apply).filter(models.Job_apply.id_job == apply_job_dic['id_job'],models.Job_apply.id_resume == apply_job_dic['id_resume']).first()
+    if job_apply != None:
+        raise HTTPException(status_code=404, detail="You have applied for this job")
     now = datetime.now()
     db_apply_job = models.Job_apply(**apply_job.dict())
     db_apply_job.time = now.strftime("%Y-%m-%d %H:%M:%S")

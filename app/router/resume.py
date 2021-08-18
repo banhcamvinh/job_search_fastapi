@@ -24,8 +24,6 @@ def read_resume_by_id_for_admin(resume_id: int,db: database.Session = Depends(da
 @router.get("/username/{username}",response_model=List[schemas.Resume_Admin])
 def read_resume_by_username_for_admin(username: str,db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
     resume_db = resume.get_resume_by_username(db=db, username = username)
-    if resume_db is None:
-        raise HTTPException(status_code=404, detail="Resume not found")
     return resume_db
 
 @router.get("/me", response_model=List[schemas.Resume])
