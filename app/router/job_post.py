@@ -1,4 +1,5 @@
-from fastapi import APIRouter,Depends,status,Response,HTTPException
+from fastapi import APIRouter,Depends,status,Response,HTTPException,Security
+from router import oauth2
 from typing import List, Optional
 import schemas,database
 from crud import job_post
@@ -9,7 +10,7 @@ router =  APIRouter(
 )
 
 @router.get("", response_model=List[schemas.Job_post])
-def read_job_posts(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db)):
+def read_job_posts(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     job_posts = job_post.get_job_posts(db, skip=skip, limit=limit)
     return job_posts
 
@@ -24,26 +25,29 @@ def read_job_post_by_filter(title: Optional[str]=None, position: Optional[str]=N
     return job_posts
 
 @router.get("/{job_post_id}", response_model = schemas.Job_post)
-def read_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db)):
+def read_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     job_post.increase_job_post_view(db=db, job_post_id= job_post_id)
     return job_post.get_job_posts_by_id(job_post_id= job_post_id,db=db)
 
 @router.post("/{username}/{id_company}", response_model=schemas.Job_post)
-def create_job_post(username: str,id_company: int, Job_post: schemas.Job_post_Create, db: database.Session = Depends(database.get_db)):
+def create_job_post(username: str,id_company: int, Job_post: schemas.Job_post_Create, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     return job_post.create_job_post(db=db, job_post = Job_post, username = username, id_company= id_company)
 
 @router.put("/update/{job_post_id}",response_model = schemas.Job_post)
-def update_job_post_by_id(job_post_id:int,Job_post: schemas.Job_post_Create, db: database.Session = Depends(database.get_db)):
+def update_job_post_by_id(job_post_id:int,Job_post: schemas.Job_post_Create, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     return job_post.update_job_post_by_id(db=db,job_post_id=job_post_id,job_post=Job_post)
 
-@router.put("/disable/{job_post_id}",response_model = schemas.Job_post)
-def disable_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db)):
-    return job_post.disable_job_post_by_id(db=db,job_post_id=job_post_id)
+@router.put("/disable/{job_post_id}", status_code = 200)
+def disable_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+    job_post.disable_job_post_by_id(db=db,job_post_id=job_post_id)
+    return {"Message":"Success"}
 
-@router.put("/accept/{job_post_id}",response_model = schemas.Job_post)
-def accept_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db)):
-    return job_post.accept_job_post_by_id(db=db,job_post_id=job_post_id)
+@router.put("/accept/{job_post_id}", status_code = 200)
+def accept_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+    job_post.accept_job_post_by_id(db=db,job_post_id=job_post_id)
+    return {"Message":"Success"}
     
-@router.put("/mode/{job_post_id}/{mode}",response_model = schemas.Job_post)
-def change_job_post_mode_by_id(job_post_id:int,mode: int, db: database.Session = Depends(database.get_db)):
-    return job_post.change_job_post__mode_by_id(db=db,job_post_id=job_post_id,mode=mode)
+@router.put("/mode/{job_post_id}/{mode}",status_code = 200)
+def change_job_post_mode_by_id(job_post_id:int,mode: int, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+    job_post.change_job_post__mode_by_id(db=db,job_post_id=job_post_id,mode=mode)
+    return {"Message":"Success"}

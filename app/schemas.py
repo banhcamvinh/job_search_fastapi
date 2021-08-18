@@ -20,12 +20,13 @@ class Job_post_Base(BaseModel):
     location: Optional[str] = None
     fields: Optional[str] = None
     tags: Optional[str] = None
-    expired_time: Optional[date] = None
+
     submit_expired_time: Optional[date] = None
 
 class Job_post_db(Job_post_Base):
     status: Optional[int] = None
     mode: Optional[int] = None
+    expired_time: Optional[date] = None
     create_time: Optional[date] = None
     update_time: Optional[date] = None
 

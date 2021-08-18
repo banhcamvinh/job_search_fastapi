@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.sql.functions import mode
 import models, schemas
+from fastapi import HTTPException
 
 def get_company(db: Session, id: int):
     return db.query(models.Company).filter(models.Company.id == id).first()
@@ -23,6 +24,9 @@ def accept_company(db: Session, company_id: int):
     if db_company != None:
         db_company.status = 1
         db.commit()
+        db.refresh(db_company)
+    else:
+        raise HTTPException(status_code=404, detail="Comapny not found")
     return db_company
 
 def disable_company(db: Session, company_id: int):
@@ -30,6 +34,9 @@ def disable_company(db: Session, company_id: int):
     if db_company != None:
         db_company.status = 0
         db.commit()
+        db.refresh(db_company)
+    else:
+        raise HTTPException(status_code=404, detail="Comapny not found")
     return db_company
 
 def update_company(db:Session,company: schemas.Company_Create,company_id:int ):
@@ -39,4 +46,6 @@ def update_company(db:Session,company: schemas.Company_Create,company_id:int ):
         db.query(models.Company).filter(models.Company.id == company_id).update(company_dic)
         db.commit()
         db.refresh(db_company)
+    else:
+        raise HTTPException(status_code=404, detail="Comapny not found")
     return db_company

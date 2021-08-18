@@ -145,7 +145,7 @@ class Company_rating(Base):
 
     content= Column(String)
     point = Column(Integer)
-    status = Column(Integer)
+    status = Column(Integer,nullable=False,default=1)
 
     nguoidanhgia_account= relationship("Account", back_populates="account_company_rating")
     company_id_company= relationship("Company", back_populates="company_company_rating")
