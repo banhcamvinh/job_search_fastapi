@@ -15,7 +15,7 @@ def read_job_posts(skip: int = 0, limit: int = 100, db: database.Session = Depen
     return job_posts
 
 @router.get("/filter", response_model= List[schemas.Job_post])
-def read_job_post_by_filter(title: Optional[str]=None, position: Optional[str]=None,skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+def read_job_post_by_filter(title: Optional[str]=None, position: Optional[str]=None, location:Optional[str]=None, type:Optional[str]=None, skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     params= locals().copy()
     filter_dict={}
     for el in params:

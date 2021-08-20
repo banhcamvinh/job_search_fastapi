@@ -53,13 +53,15 @@ def delete_account_rating_detail(db:Session, who:str, towhom:str, time: datetime
 
 def edit_account_rating(db: Session, account_rating: schemas.Account_rating_time):
     account_rating_dict = dict(account_rating)
-    who_acc = db.query(models.Account).filter(models.Account.username == account_rating_dict['nguoidanhgia']).first()
-    towhom_acc = db.query(models.Account).filter(models.Account.username == account_rating_dict['nguoibidanhgia']).first()
+    who_acc = db.query(models.Account).filter(models.Account.username == account_rating_dict['nguoidanhgia'], models.Account.status != 0).first()
+    towhom_acc = db.query(models.Account).filter(models.Account.username == account_rating_dict['nguoibidanhgia'], models.Account.status != 0).first()
     if who_acc is None:
         raise HTTPException(status_code=404, detail="Account used for rating not found")
     if towhom_acc is None:
         raise HTTPException(status_code=404, detail="Account is rated not found") 
     account_rating_db = db.query(models.Account_rating).filter(models.Account_rating.nguoidanhgia == account_rating_dict['nguoidanhgia'],models.Account_rating.nguoibidanhgia == account_rating_dict['nguoibidanhgia'],models.Account_rating.time == account_rating_dict['time']).first()
+    if account_rating_db is None:
+        raise HTTPException(status_code=404, detail="account rating not found")
     account_rating_db.content = account_rating_dict['content']
     account_rating_db.point = account_rating_dict['point']
     now = datetime.now()

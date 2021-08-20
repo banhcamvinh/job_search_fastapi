@@ -1,18 +1,22 @@
 from datetime import datetime
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.base import NO_ARG
 from sqlalchemy.sql.functions import mode
 import models, schemas
 from fastapi import HTTPException
 
 
 def get_company_rating(db: Session, company_id: int):
+    com = db.query(models.Company).filter(models.Company.id == company_id, models.Company.status != 0).first()
+    if com is None:
+        raise HTTPException(status_code=404, detail="Company not found")
     return db.query(models.Company_rating).filter(models.Company_rating.company_id == company_id).all()
 
-def get_company_rating_detail(db:Session, username:str, company_id: int, time: datetime):
+def get_company_rating_detail(db:Session, username: str, company_id: int, time: datetime):
     acc = db.query(models.Account).filter(models.Account.username == username).first()
     if acc is None:
         raise HTTPException(status_code=404, detail="Acc not found")
-    company = db.query(models.Company).first(models.Company.id == company_id).first()
+    company = db.query(models.Company).filter(models.Company.id == company_id).first()
     if company is None:
         raise HTTPException(status_code=404, detail="Company not found")
     company_rating_detail = db.query(models.Company_rating).filter(models.Company_rating.nguoidanhgia == username,models.Company_rating.company_id == company_id,models.Company_rating.time == time).first()
@@ -20,10 +24,10 @@ def get_company_rating_detail(db:Session, username:str, company_id: int, time: d
 
 def create_company_rating(db: Session, company_rating: schemas.Company_rating_Create):
     company_rating_dic = dict(company_rating)
-    acc = db.query(models.Account).filter(models.Account.username == company_rating_dic['nguoidanhgi']).first()
+    acc = db.query(models.Account).filter(models.Account.username == company_rating_dic['nguoidanhgia'],models.Account.status != 0).first()
     if acc is None:
         raise HTTPException(status_code=404, detail="Acc not found")
-    company = db.query(models.Company).first(models.Company.id == company_rating_dic['company_id']).first()
+    company = db.query(models.Company).filter(models.Company.id == company_rating_dic['company_id'], models.Company.status != 0).first()
     if company is None:
         raise HTTPException(status_code=404, detail="Company not found")
     now = datetime.now()
@@ -38,7 +42,7 @@ def delete_company_rating_detail(db:Session, username:str, company_id:str, time:
     acc = db.query(models.Account).filter(models.Account.username == username).first()
     if acc is None:
         raise HTTPException(status_code=404, detail="Acc not found")
-    company = db.query(models.Company).first(models.Company.id == company_id).first()
+    company = db.query(models.Company).filter(models.Company.id == company_id).first()
     if company is None:
         raise HTTPException(status_code=404, detail="Company not found")
     company_rating_detail = db.query(models.Company_rating).filter(models.Company_rating.nguoidanhgia == username,models.Company_rating.company_id == company_id,models.Company_rating.time == time).first()
@@ -54,10 +58,12 @@ def edit_company_rating(db: Session, company_rating: schemas.Company_rating_time
     acc = db.query(models.Account).filter(models.Account.username == company_rating_dict['nguoidanhgia']).first()
     if acc is None:
         raise HTTPException(status_code=404, detail="Acc not found")
-    company = db.query(models.Company).first(models.Company.id == company_rating_dict['company_id']).first()
+    company = db.query(models.Company).filter(models.Company.id == company_rating_dict['company_id']).first()
     if company is None:
         raise HTTPException(status_code=404, detail="Company not found")
     company_rating_db = db.query(models.Company_rating).filter(models.Company_rating.nguoidanhgia == company_rating_dict['nguoidanhgia'],models.Company_rating.company_id == company_rating_dict['company_id'],models.Company_rating.time == company_rating_dict['time']).first()
+    if company_rating_db is None:
+        raise HTTPException(status_code=404, detail="Company rating not found")
     company_rating_db.content = company_rating_dict['content']
     company_rating_db.point = company_rating_dict['point']
     db.commit()
@@ -68,7 +74,7 @@ def hide_company_rating(db:Session, username:str, company_id:str, time: datetime
     acc = db.query(models.Account).filter(models.Account.username == username).first()
     if acc is None:
         raise HTTPException(status_code=404, detail="Acc not found")
-    company = db.query(models.Company).first(models.Company.id == company_id).first()
+    company = db.query(models.Company).filter(models.Company.id == company_id).first()
     if company is None:
         raise HTTPException(status_code=404, detail="Company not found")
     company_rating_detail = db.query(models.Company_rating).filter(models.Company_rating.nguoidanhgia == username,models.Company_rating.company_id == company_id,models.Company_rating.time == time).first()

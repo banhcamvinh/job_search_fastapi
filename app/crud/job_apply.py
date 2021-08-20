@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 
 def get_job_apply_by_account(db: Session, username: str):
-    user = db.query(models.Account).filter(models.Account.username == username).first()
+    user = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     resume_id_lst = []
@@ -18,7 +18,7 @@ def get_job_apply_by_account(db: Session, username: str):
     return jobs
 
 def get_job_apply_by_resume(db: Session, resume_id: int):
-    resume = db.query(models.Resume).filter(models.Resume.id == resume_id).first()
+    resume = db.query(models.Resume).filter(models.Resume.id == resume_id, models.Resume.status != 0).first()
     if resume is None:
         raise HTTPException(status_code=404, detail="Resume not found")
     job_applies = db.query(models.Job_apply).filter(models.Job_apply.id_resume == resume_id).all()
@@ -34,20 +34,20 @@ def get_resume_apply_to_job(db:Session, job_id: int):
     return resumes
 
 def get_account_apply_to_job(db:Session, job_id: int):
-    job = db.query(models.Job_post).filter(models.Job_post.id == job_id).first()
+    job = db.query(models.Job_post).filter(models.Job_post.id == job_id, models.Job_post.status != 0).first()
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     job_applies = db.query(models.Job_apply).filter(models.Job_apply.id_job == job_id).all()
     resumes = db.query(models.Resume).filter(models.Resume.id.in_([el.id_resume for el in job_applies])).all()
-    accounts = db.query(models.Account).filter(models.Account.username.in_([el.create_by for el in resumes]) ).all()
+    accounts = db.query(models.Account).filter(models.Account.username.in_([el.create_by for el in resumes]), models.Account.status != 0 ).all()
     return accounts
 
 def create_job_apply(db:Session, apply_job: schemas.Job_apply_Create):
     apply_job_dic = dict(apply_job)
-    job = db.query(models.Job_post).filter(models.Job_post.id == apply_job_dic['id_job']).first()
+    job = db.query(models.Job_post).filter(models.Job_post.id == apply_job_dic['id_job'], models.Job_post.status != 0).first()
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
-    resume = db.query(models.Resume).filter(models.Resume.id == apply_job_dic["id_resume"]).first()
+    resume = db.query(models.Resume).filter(models.Resume.id == apply_job_dic["id_resume"], models.Resume.status != 0).first()
     if resume is None:
         raise HTTPException(status_code=404, detail="Resume not found")
     job_apply = db.query(models.Job_apply).filter(models.Job_apply.id_job == apply_job_dic['id_job'],models.Job_apply.id_resume == apply_job_dic['id_resume']).first()

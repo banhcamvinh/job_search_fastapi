@@ -6,16 +6,24 @@ from fastapi import HTTPException
 
 
 def get_account_job_mark(db: Session, username: str):
+    acc = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0).first()
+    if acc is None:
+        raise HTTPException(status_code=404, detail="User not found")
     return db.query(models.Job_mark).filter(models.Job_mark.by_account == username, models.Job_mark.status != 0).all()
 
 def get_account_job_mark_with_job(db: Session, username: str,job_id: int):
-    job = db.query(models.Job_post).filter(models.Job_post.id == job_id).first()
+    acc = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0).first()
+    if acc is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    job = db.query(models.Job_post).filter(models.Job_post.id == job_id, models.Job_post.status != 0).first()
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     return db.query(models.Job_mark).filter(models.Job_mark.by_account == username,models.Job_mark.id_job == job_id, models.Job_mark.status != 0).first()
 
-
 def account_job_unmark(db: Session, username:str, job_id: int):
+    acc = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0 ).first()
+    if acc is None:
+        raise HTTPException(status_code=404, detail="User not found")
     job = db.query(models.Job_post).filter(models.Job_post.id == job_id).first()
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
@@ -28,6 +36,9 @@ def account_job_unmark(db: Session, username:str, job_id: int):
     return job_mark
 
 def account_job_mark(db:Session, username:str, job_id:int):
+    acc = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0 ).first()
+    if acc is None:
+        raise HTTPException(status_code=404, detail="User not found")
     job = db.query(models.Job_post).filter(models.Job_post.id == job_id).first()
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")

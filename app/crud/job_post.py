@@ -15,10 +15,10 @@ def get_job_posts_by_id(job_post_id:int,db: Session):
     return job_post
 
 def create_job_post(db: Session, job_post: schemas.Job_post_Create, username: str, id_company: int):
-    user = db.query(models.Account).filter(models.Account.username == username).first()
+    user = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    company = db.query(models.Company).filter(models.Company.id == id_company).first()
+    company = db.query(models.Company).filter(models.Company.id == id_company, models.Company.status != 0).first()
     if company is None:
         raise HTTPException(status_code=404, detail="Company not found")
     db_job_post = models.Job_post(**job_post.dict(), posted_by=username,about_company= id_company)
@@ -61,7 +61,7 @@ def disable_job_post_by_id(db:Session,job_post_id:int):
         raise HTTPException(status_code=404, detail="Job_post not found")
 
 def increase_job_post_view(db: Session,job_post_id: int):
-    db_job_post = db.query(models.Job_post).filter(models.Job_post.id == job_post_id).first()
+    db_job_post = db.query(models.Job_post).filter(models.Job_post.id == job_post_id, models.Job_post.status != 0).first()
     if db_job_post != None:
         db_job_post.view += 1
         db.commit()
@@ -77,7 +77,7 @@ def accept_job_post_by_id(db:Session, job_post_id: int):
         raise HTTPException(status_code=404, detail="Job_post not found")
 
 def change_job_post__mode_by_id(db:Session, job_post_id: int,mode: int):
-    db_job_post = db.query(models.Job_post).filter(models.Job_post.id == job_post_id).first()
+    db_job_post = db.query(models.Job_post).filter(models.Job_post.id == job_post_id, models.Job_post.status != 0).first()
     if db_job_post != None:
         db_job_post.mode = mode
         db.commit()

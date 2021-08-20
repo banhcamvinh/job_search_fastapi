@@ -40,8 +40,13 @@ def create_account(db: Session, account: schemas.Account_create):
     db.refresh(db_account)
     return db_account
 
+def del_account(db:Session, username: str):
+    db_acc = db.query(models.Account).filter(models.Account.username == username).first()
+    db.delete(db_acc)
+    db.commit()
+
 def update_user_account_info(db:Session,account: schemas.Account_Info_user,username:str):
-    db_account = db.query(models.Account).filter(models.Account.username == username).first()
+    db_account = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0).first()
     if db_account != None:
         account_dic = dict(account)
         db.query(models.Account).filter(models.Account.username == username).update(account_dic)
@@ -72,3 +77,4 @@ def disable_account(db:Session,username:str):
     if db_account != None:
         db_account.status=0
         db.commit()
+

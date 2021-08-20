@@ -67,7 +67,11 @@ def create_account(accounts: schemas.Account_create, db: database.Session = Depe
     </body>
     </html>
     """.format(accounts.username)
-    my_email.send_email(accounts.username,"Verification Email for register our platform",content)
+    try:
+        my_email.send_email(accounts.username,"Verification Email for register our platform",content)
+    except:
+        account.del_account(db=db,username=accounts.username)
+        raise HTTPException(status_code=400, detail="Sending email went wrong! Please try again")
     return accounts
 
 @router.post("/forgot_password/{username}",response_model= schemas.Account_Info)
@@ -76,6 +80,7 @@ def forgot_password(username:str,db: database.Session= Depends(database.get_db))
     if not db_account:
         raise HTTPException(status_code=400, detail="This account does not exist")
     
+    old_pass = db_account.password
     letters = string.ascii_letters
     new_password =  ''.join(random.choice(letters) for i in range(10))
     account.change_account_password(db,username=username,password=new_password)
@@ -91,7 +96,11 @@ def forgot_password(username:str,db: database.Session= Depends(database.get_db))
     </body>
     </html>
     """.format(new_password)
-    my_email.send_email(username,"Re-send password",content)
+    try:
+        my_email.send_email(username,"Re-send password",content)
+    except:
+        account.change_account_password(db,username=username,password=old_pass)
+        raise HTTPException(status_code=400, detail="Sending email went wrong! Please try again")
     return db_account
 
 @router.put("/me/update",response_model= schemas.Account_Info)
