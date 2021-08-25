@@ -47,6 +47,9 @@ def create_job_apply(db:Session, apply_job: schemas.Job_apply_Create):
     job = db.query(models.Job_post).filter(models.Job_post.id == apply_job_dic['id_job'], models.Job_post.status != 0).first()
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
+    now = datetime.now()
+    if job.submit_expired_time < now.date():
+        raise HTTPException(status_code=404, detail="Time expired")
     resume = db.query(models.Resume).filter(models.Resume.id == apply_job_dic["id_resume"], models.Resume.status != 0).first()
     if resume is None:
         raise HTTPException(status_code=404, detail="Resume not found")

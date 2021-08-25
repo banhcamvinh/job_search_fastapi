@@ -115,7 +115,7 @@ class Job_apply(Base):
 
     id_job = Column(ForeignKey('job_post.id'),primary_key=True)
     id_resume = Column(ForeignKey('resume.id'),primary_key=True)
-    time = Column(DateTime)
+    time = Column(DateTime) 
     refer_code = Column(String)
     status = Column(Integer,nullable=False,default=1)
 
