@@ -38,7 +38,7 @@ def update_job_post_by_id(job_post_id:int,Job_post: schemas.Job_post_Create, db:
     return job_post.update_job_post_by_id(db=db,job_post_id=job_post_id,job_post=Job_post)
 
 @router.put("/disable/{job_post_id}", status_code = 200)
-def disable_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+def disable_job_post_by_id(job_post_id:int, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user)):
     job_post.disable_job_post_by_id(db=db,job_post_id=job_post_id)
     return {"Message":"Success"}
 

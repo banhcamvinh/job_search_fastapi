@@ -34,7 +34,7 @@ def get_account_apply_to_job(job_id: int, db: database.Session = Depends(databas
 @router.post("", response_model = schemas.Job_apply)
 def create_job_apply(job_apply_in: schemas.Job_apply_Create,db:database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     job_apply_db = job_apply.create_job_apply(db=db,apply_job=job_apply_in)
-    job = job_post.get_job_posts_by_id(job_apply_db.id_job)
+    job = job_post.get_job_posts_by_id(db=db,job_id=job_apply_db.id_job)
     return job_apply_db
 
 @router.put("/unapply/{job_id}/{resume_id}")

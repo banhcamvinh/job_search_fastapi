@@ -44,7 +44,7 @@ def update_job_post_by_id(job_post: schemas.Job_post_Create,db:Session,job_post_
         job_post_dic = dict(job_post)
         now = datetime.now()
         db_job_post.update_time = now.strftime("%Y/%m/%d %H:%M:%S")
-        db.query(models.Job_post).update(job_post_dic)
+        db.query(models.Job_post).filter(models.Job_post.id == job_post_id,models.Job_post.status != 0).update(job_post_dic)
         db.commit()
         db.refresh(db_job_post)
     else:

@@ -30,6 +30,7 @@ def verify_token(security_scopes: SecurityScopes,token: str,credentials_exceptio
         else: 
             authenticate_value = f"Bearer"
 
+
         for scope in security_scopes.scopes:
             if scope not in token_data.scopes:
                 raise HTTPException(
