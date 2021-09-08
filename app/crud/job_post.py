@@ -21,6 +21,10 @@ def create_job_post(db: Session, job_post: schemas.Job_post_Create, username: st
     company = db.query(models.Company).filter(models.Company.id == id_company, models.Company.status != 0).first()
     if company is None:
         raise HTTPException(status_code=404, detail="Company not found")
+    job_post_dict = dict(job_post)
+    now = datetime.now()
+    if job_post_dict['submit_expired_time'] <= now.date():
+        raise HTTPException(status_code=404, detail="Submit expired time invalid")
     db_job_post = models.Job_post(**job_post.dict(), posted_by=username,about_company= id_company)
     now = datetime.now()
     expired_time = now + timedelta(weeks=4)
@@ -41,9 +45,12 @@ def get_job_posts_filter(filters:dict,db: Session, skip: int = 0, limit: int = 1
 def update_job_post_by_id(job_post: schemas.Job_post_Create,db:Session,job_post_id:int):
     db_job_post = db.query(models.Job_post).filter(models.Job_post.id == job_post_id,models.Job_post.status != 0).first()
     if db_job_post != None:
+
         job_post_dic = dict(job_post)
         now = datetime.now()
         db_job_post.update_time = now.strftime("%Y/%m/%d %H:%M:%S")
+        if job_post_dic['submit_expired_time'] <= now.date():
+            raise HTTPException(status_code=404, detail="Submit expired time invalid")
         db.query(models.Job_post).filter(models.Job_post.id == job_post_id,models.Job_post.status != 0).update(job_post_dic)
         db.commit()
         db.refresh(db_job_post)

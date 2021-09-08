@@ -44,7 +44,12 @@ def account_job_mark(db:Session, username:str, job_id:int):
         raise HTTPException(status_code=404, detail="Job not found")
     job_mark = db.query(models.Job_mark).filter( models.Job_mark.by_account == username, models.Job_mark.id_job == job_id).first()
     if job_mark:
-        raise HTTPException(status_code=404, detail="Marked before")
+        if job_mark.status == 0:
+            job_mark.status =1
+            db.commit()
+            return job_mark
+        else:
+            raise HTTPException(status_code=404, detail="Marked before")
     else:
         now = datetime.now()
         job_mark = models.Job_mark(id_job=job_id, by_account=username,status=1,time= now.strftime("%Y-%m-%d %H:%M:%S"))

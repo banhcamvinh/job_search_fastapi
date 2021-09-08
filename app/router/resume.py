@@ -1,3 +1,4 @@
+from datetime import timedelta
 from fastapi import APIRouter,Depends,status,Response,HTTPException,Security
 from router import oauth2
 from typing import List
@@ -41,6 +42,11 @@ def accept_resume(resume_id: int, db: database.Session = Depends(database.get_db
     return {"message":"success"}
 
 @router.put("/disable/{resume_id}",status_code=200)
-def disable_resume(resume_id: int, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+def disable_resume(resume_id: int, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     resume.disable_resume(db=db, resume_id= resume_id)
     return {"message":"success"}
+
+@router.put("/update/{resume_id}",status_code=200)
+def update_resume(resume_id: int,resumes: schemas.Resume_Create, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+    resume.update_resume_by_id(resume_id= resume_id, resume=resumes, db=db)
+    return {"Message":"Success"}

@@ -7,21 +7,21 @@ from datetime import date, time,datetime
 
 
 class Job_post_Base(BaseModel):
-    title: Optional[str] = None
-    position: Optional[str] = None
-    salary: Optional[str] = None
-    academic_level: Optional[str] = None
-    experience: Optional[str] = None
-    type: Optional[str] = None
-    description: Optional[str] = None
-    requirements: Optional[str] = None
-    benefit: Optional[str] = None
-    quantity: Optional[int] = None
-    location: Optional[str] = None
-    fields: Optional[str] = None
-    tags: Optional[str] = None
+    title: str
+    position: str
+    salary: str
+    academic_level: str
+    experience: str
+    type: str
+    description: str
+    requirements: str
+    benefit: str
+    quantity: int
+    location: str
+    fields: str
+    tags: str
 
-    submit_expired_time: Optional[date] = None
+    submit_expired_time: date
 
 class Job_post_db(Job_post_Base):
     status: Optional[int] = None
@@ -42,18 +42,17 @@ class Job_post(Job_post_Base):
         orm_mode = True
 
 
-
 class Resume_Base(BaseModel):
-    title: Optional[str] = None
-    overview: Optional[str] = None
-    position: Optional[str] = None
-    salary: Optional[int] = None
-    experience: Optional[str] = None
-    fields: Optional[str] = None
-    location: Optional[str] = None
-    academic_level: Optional[str] = None
-    tags: Optional[str] = None
-    file: Optional[str] = None
+    title: str
+    overview: str
+    position: str
+    salary: int
+    experience: str
+    fields: str
+    location: str
+    academic_level: str
+    tags: str
+    file: str
 
 class Resume_Create(Resume_Base):
     pass
@@ -93,7 +92,7 @@ class Account_db(Account_Base):
     role: int = 0
 
 class Account_create(Account_Base):
-    password: str = 123
+    password: str
 
 class Account_Admin(Account_Info_user):
     status: int = 0
@@ -103,7 +102,7 @@ class Account_Admin(Account_Info_user):
         orm_mode = True
 
 class Account_password(BaseModel):
-    password: str = 123
+    password: str
 
 class Account_Relationship(Account_Base):
     resumes: List[Resume] = []
@@ -161,9 +160,9 @@ class Job_mark(Job_mark_Base):
 
 
 class Job_apply_Base(BaseModel):
-    id_job: Optional[int] = None
-    id_resume: Optional[int] = None
-    refer_code: Optional[str] = None
+    id_job: int
+    id_resume: int
+    refer_code: str
 
 class Job_apply_Create(Job_apply_Base):
     pass
@@ -181,16 +180,16 @@ class Job_apply(Job_apply_Base):
 
 
 class Account_rating_Base(BaseModel):
-    nguoidanhgia: Optional[str] = None
-    nguoibidanhgia: Optional[str] = None
-    content: Optional[str]= None
-    point: Optional[int]= None
+    nguoidanhgia: str
+    nguoibidanhgia: str
+    content: str
+    point: int
 
 class Account_rating_Create(Account_rating_Base):
     pass
 
 class Account_rating_time(Account_rating_Base):
-    time: Optional[datetime] = None
+    time: datetime
 
 class Account_rating_db(Account_rating_Base):
     time: Optional[datetime] = None
@@ -202,16 +201,16 @@ class Account_rating(Account_rating_Base):
 
 
 class Company_rating_Base(BaseModel):
-    nguoidanhgia: Optional[str] = None
-    company_id: Optional[int] = None
-    content: Optional[str]= None
-    point: Optional[int]= None
+    nguoidanhgia: str
+    company_id: int
+    content: str
+    point: int
 
 class Company_rating_Create(Company_rating_Base):
     pass
 
 class Company_rating_time(Company_rating_Base):
-    time: Optional[datetime] = None
+    time: datetime
 
 class Company_rating_db(Company_rating_Base):
     time: Optional[datetime] = None

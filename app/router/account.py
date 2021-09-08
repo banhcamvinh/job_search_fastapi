@@ -13,6 +13,7 @@ router =  APIRouter(
     prefix = "/accounts"
 )
 
+
 @router.get("/me", response_model=schemas.Account_Info)
 def read_account_for_user( db: database.Session = Depends(database.get_db), current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     db_account = account.get_account(db, username= current_user.username)
