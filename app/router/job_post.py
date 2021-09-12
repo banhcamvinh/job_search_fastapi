@@ -14,6 +14,33 @@ def read_job_posts(skip: int = 0, limit: int = 100, db: database.Session = Depen
     job_posts = job_post.get_job_posts(db, skip=skip, limit=limit)
     return job_posts
 
+@router.get("/me/active", response_model=List[schemas.Job_post])
+def read_job_posts_me_active(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+    job_posts = job_post.get_job_posts_me_active(db=db, skip=skip, limit=limit,username= current_user.username)
+    return job_posts
+
+@router.get("/me/inactive", response_model=List[schemas.Job_post])
+def read_job_posts_me_inactive(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+    job_posts = job_post.get_job_posts_me_inactive(db=db, skip=skip, limit=limit,username= current_user.username)
+    return job_posts
+
+@router.get("/me/all", response_model=List[schemas.Job_post])
+def read_job_posts_me_all(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+    job_posts = job_post.get_job_posts_me_all(db=db, skip=skip, limit=limit,username= current_user.username)
+    return job_posts
+
+@router.get("/applicants", response_model=List[schemas.Job_post])
+def read_job_posts_me_applicants(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+    job_posts = job_post.get_job_with_applicants(db, skip=skip, limit=limit,username= current_user.username)
+    return job_posts
+
+
+@router.get("/inactive", response_model=List[schemas.Job_post])
+def read_job_posts_inactive(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+    job_posts = job_post.get_job_posts_inactive(db, skip=skip, limit=limit)
+    return job_posts
+
+
 @router.get("/filter", response_model= List[schemas.Job_post])
 def read_job_post_by_filter(title: Optional[str]=None, position: Optional[str]=None, location:Optional[str]=None, type:Optional[str]=None, skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     params= locals().copy()

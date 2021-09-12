@@ -15,6 +15,12 @@ def read_resumes_for_admin(skip: int = 0, limit: int = 100, db: database.Session
     resumes = resume.get_resumes(db, skip=skip, limit=limit)
     return resumes
 
+@router.get("/inactive", response_model=List[schemas.Resume_Admin])
+def read_resumes_inactive_for_admin(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db), current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+    resumes = resume.get_resumes_inactive(db, skip=skip, limit=limit)
+    return resumes
+
+
 @router.get("/id/{resume_id}",response_model=schemas.Resume_Admin)
 def read_resume_by_id_for_admin(resume_id: int,db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
     resume_db = resume.get_resume_by_id(db=db, resume_id = resume_id)
@@ -27,9 +33,19 @@ def read_resume_by_username_for_admin(username: str,db: database.Session = Depen
     resume_db = resume.get_resume_by_username(db=db, username = username)
     return resume_db
 
-@router.get("/me", response_model=List[schemas.Resume])
-def read_resumes_for_user( db: database.Session = Depends(database.get_db), current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
-    resumes = resume.get_resumes_for_user(db, username= current_user.username)
+@router.get("/me/active", response_model=List[schemas.Resume])
+def read_resumes_for_user_active( db: database.Session = Depends(database.get_db), current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+    resumes = resume.get_resumes_for_user_active(db, username= current_user.username)
+    return resumes
+
+@router.get("/me/inactive", response_model=List[schemas.Resume])
+def read_resumes_for_user_inactive( db: database.Session = Depends(database.get_db), current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+    resumes = resume.get_resumes_for_user_inactive(db, username= current_user.username)
+    return resumes
+
+@router.get("/me/all", response_model=List[schemas.Resume])
+def read_resumes_for_user_all( db: database.Session = Depends(database.get_db), current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
+    resumes = resume.get_resumes_for_user_all(db, username= current_user.username)
     return resumes
 
 @router.post("/me", response_model=schemas.Resume)

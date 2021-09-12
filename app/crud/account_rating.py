@@ -22,6 +22,8 @@ def get_account_rating_detail(db:Session, who:str, towhom:str, time: datetime):
 
 def create_account_rating(db: Session, account_rating: schemas.Account_rating_Create):
     account_rating_dic = dict(account_rating)
+    if account_rating_dic['point'] < 1 or account_rating_dic['point'] > 5:
+        raise HTTPException(status_code=404, detail="Invalid point")
     who_acc = db.query(models.Account).filter(models.Account.username == account_rating_dic['nguoidanhgia']).first()
     towhom_acc = db.query(models.Account).filter(models.Account.username == account_rating_dic['nguoibidanhgia']).first()
     if who_acc is None:
@@ -53,6 +55,8 @@ def delete_account_rating_detail(db:Session, who:str, towhom:str, time: datetime
 
 def edit_account_rating(db: Session, account_rating: schemas.Account_rating_time):
     account_rating_dict = dict(account_rating)
+    if account_rating_dict['point'] < 1 or account_rating_dict['point'] > 5:
+        raise HTTPException(status_code=404, detail="Invalid point")
     who_acc = db.query(models.Account).filter(models.Account.username == account_rating_dict['nguoidanhgia'], models.Account.status != 0).first()
     towhom_acc = db.query(models.Account).filter(models.Account.username == account_rating_dict['nguoibidanhgia'], models.Account.status != 0).first()
     if who_acc is None:

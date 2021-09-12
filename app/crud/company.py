@@ -9,6 +9,9 @@ def get_company(db: Session, id: int):
 def get_companys(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Company).offset(skip).limit(limit).all()
 
+def get_companys_inactive(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Company).filter(models.Company.status == 0).offset(skip).limit(limit).all()
+
 def get_active_companys(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Company).filter(models.Company.status != 0).offset(skip).limit(limit).all()
 

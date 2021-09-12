@@ -7,11 +7,26 @@ from fastapi import HTTPException
 def get_resumes(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Resume).offset(skip).limit(limit).all()
 
-def get_resumes_for_user(db: Session,username: str):
+def get_resumes_inactive(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Resume).filter(models.Resume.status == 0).offset(skip).limit(limit).all()
+
+def get_resumes_for_user_active(db: Session,username: str):
     account = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0).first()
     if account is None:
         raise HTTPException(status_code=404, detail="User not found")
     return db.query(models.Resume).filter(models.Resume.create_by == username,models.Resume.status != 0).all()
+
+def get_resumes_for_user_inactive(db: Session,username: str):
+    account = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0).first()
+    if account is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db.query(models.Resume).filter(models.Resume.create_by == username,models.Resume.status == 0).all()
+
+def get_resumes_for_user_all(db: Session,username: str):
+    account = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0).first()
+    if account is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db.query(models.Resume).filter(models.Resume.create_by == username).all()
 
 def get_resume_by_id(db:Session, resume_id: int):
     resume = db.query(models.Resume).filter(models.Resume.id == resume_id).first()

@@ -39,7 +39,7 @@ def account_job_mark(db:Session, username:str, job_id:int):
     acc = db.query(models.Account).filter(models.Account.username == username, models.Account.status != 0 ).first()
     if acc is None:
         raise HTTPException(status_code=404, detail="User not found")
-    job = db.query(models.Job_post).filter(models.Job_post.id == job_id).first()
+    job = db.query(models.Job_post).filter(models.Job_post.id == job_id,models.Job_post.status!= 0).first()
     if job is None:
         raise HTTPException(status_code=404, detail="Job not found")
     job_mark = db.query(models.Job_mark).filter( models.Job_mark.by_account == username, models.Job_mark.id_job == job_id).first()

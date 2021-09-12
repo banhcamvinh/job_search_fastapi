@@ -14,6 +14,11 @@ def read_conmpanys(skip: int = 0, limit: int = 100, db: database.Session = Depen
     companys = company.get_companys(db, skip=skip, limit=limit)
     return companys
 
+@router.get("/inactive", response_model=List[schemas.Company])
+def read_conmpanys_inactive(skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Security(oauth2.get_current_user, scopes=["1"])):
+    companys = company.get_companys_inactive(db, skip=skip, limit=limit)
+    return companys
+
 @router.get("/filter", response_model= List[schemas.Company])
 def read_company_by_filter(name: Optional[str]=None, industry: Optional[str]=None,skip: int = 0, limit: int = 100, db: database.Session = Depends(database.get_db),current_user: schemas.Account_Info = Depends(oauth2.get_current_user)):
     params= locals().copy()

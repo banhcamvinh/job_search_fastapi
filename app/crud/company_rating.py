@@ -24,6 +24,8 @@ def get_company_rating_detail(db:Session, username: str, company_id: int, time: 
 
 def create_company_rating(db: Session, company_rating: schemas.Company_rating_Create):
     company_rating_dic = dict(company_rating)
+    if company_rating_dic['point'] < 1 or company_rating_dic['point'] > 5:
+        raise HTTPException(status_code=404, detail="Invalid point")
     acc = db.query(models.Account).filter(models.Account.username == company_rating_dic['nguoidanhgia'],models.Account.status != 0).first()
     if acc is None:
         raise HTTPException(status_code=404, detail="Acc not found")
@@ -55,6 +57,8 @@ def delete_company_rating_detail(db:Session, username:str, company_id:str, time:
 
 def edit_company_rating(db: Session, company_rating: schemas.Company_rating_time):
     company_rating_dict = dict(company_rating)
+    if company_rating_dict['point'] < 1 or company_rating_dict['point'] > 5:
+        raise HTTPException(status_code=404, detail="Invalid point")
     acc = db.query(models.Account).filter(models.Account.username == company_rating_dict['nguoidanhgia']).first()
     if acc is None:
         raise HTTPException(status_code=404, detail="Acc not found")

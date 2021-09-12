@@ -6,6 +6,31 @@ import models, schemas
 from fastapi import HTTPException
 
 def get_job_posts(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Job_post).filter(models.Job_post.status != 0).offset(skip).limit(limit).all()\
+
+def get_job_posts_me_active(username: str,db: Session, skip: int = 0, limit: int = 100):
+    db_user = db.query(models.Account).filter(models.Account.username == username,models.Account.status !=0 ).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db.query(models.Job_post).filter(models.Job_post.status != 0,models.Job_post.posted_by == username).offset(skip).limit(limit).all()
+
+def get_job_posts_me_inactive(username: str,db: Session, skip: int = 0, limit: int = 100):
+    db_user = db.query(models.Account).filter(models.Account.username == username,models.Account.status !=0 ).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db.query(models.Job_post).filter(models.Job_post.status == 0,models.Job_post.posted_by == username).offset(skip).limit(limit).all()
+
+def get_job_posts_me_all(username: str,db: Session, skip: int = 0, limit: int = 100):
+    db_user = db.query(models.Account).filter(models.Account.username == username,models.Account.status !=0 ).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db.query(models.Job_post).filter(models.Job_post.posted_by == username).offset(skip).limit(limit).all()
+
+
+def get_job_posts_inactive(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(models.Job_post).filter(models.Job_post.status == 0).offset(skip).limit(limit).all()
+
+def get_job_posts(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.Job_post).filter(models.Job_post.status != 0).offset(skip).limit(limit).all()
 
 def get_job_posts_by_id(job_post_id:int,db: Session):
@@ -90,3 +115,11 @@ def change_job_post__mode_by_id(db:Session, job_post_id: int,mode: int):
         db.commit()
     else:
         raise HTTPException(status_code=404, detail="Job_post not found")
+
+def get_job_with_applicants(db:Session,username: str,skip: int = 0, limit: int = 100):
+    db_user = db.query(models.Account).filter(models.Account.username == username,models.Account.status !=0 ).first()
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    job_applies = db.query(models.Job_apply).filter(models.Job_apply.status != 0).all()
+    job_posts = db.query(models.Job_post).filter(models.Job_post.id.in_([el.id_job for el in job_applies]),models.Job_post.posted_by == username).all()
+    return job_posts
